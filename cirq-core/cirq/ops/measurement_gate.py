@@ -89,8 +89,12 @@ class MeasurementGate(raw_types.Gate):
             key if isinstance(key, value.MeasurementKey) else value.MeasurementKey(name=key)
         )
         self._invert_mask = invert_mask or ()
-        if self.invert_mask is not None and len(self.invert_mask) > self.num_qubits():
+        if self._invert_mask is not None and len(self._invert_mask) > self.num_qubits():
             raise ValueError('len(invert_mask) > num_qubits')
+        reduced_inverted_mask = list(self._invert_mask)
+        while len(reduced_inverted_mask) > 0 and not reduced_inverted_mask[-1]:
+            del reduced_inverted_mask[-1]
+        self._invert_mask = Tuple(reduced_inverted_mask)
         self._confusion_map = confusion_map or {}
         if any(x >= self.num_qubits() for idx in self._confusion_map for x in idx):
             raise ValueError('Confusion matrices have index out of bounds.')
